@@ -4,12 +4,27 @@ const mysql = require("mysql");
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+
+// Define a custom CORS middleware to disable CORS for a specific origin
+const customCorsOptions = {
+    origin: function (origin, callback) {
+        // Check if the origin matches the one you want to disable CORS for
+        if (origin === 'http://35.154.221.174:3000') {
+            callback(null, false); // Disable CORS for this origin
+        } else {
+            callback(null, true); // Allow CORS for other origins
+        }
+    }
+};
+
+// Apply the custom CORS middleware
+app.use(cors(customCorsOptions));
 
 const db = mysql.createConnection({
-    host: "localhost",
+    host: "database-1.cjagagyuydl1.ap-south-1.rds.amazonaws.com",
     user: "root",
-    password: "",
+    port: 3306,
+    password: "6393775478",
     database: "crud"
 });
 
@@ -19,6 +34,14 @@ db.connect((err) => {
         return;
     }
     console.log("Connected to database");
+    db.query("SELECT * FROM student", (err, results) => {
+        if (err) {
+            console.error("Error executing query:", err);
+            return;
+        }
+        // Output the results
+        console.log("All records from student table:", results);
+    });
 });
 
 app.get("/", (req, res) => {
